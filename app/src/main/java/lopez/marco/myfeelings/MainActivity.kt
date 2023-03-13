@@ -12,6 +12,8 @@ import lopez.myfeelings.graph.utilities.JSONFile
 import lopez.myfeelings.graph.utilities.emociones
 import org.json.JSONArray
 import org.json.JSONException
+import android.widget.Toast
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
     var jsonFile: JSONFile?=null
@@ -55,7 +57,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun iconoMayoria(){
+        if (happy > veryHappy && happy > neutral && happy > sad && happy > verySad){
+            icon.setImageDrawable(resources.getDrawable(R.drawable.ic_happy))
+        }
 
+        if (veryHappy > happy && veryHappy > neutral && veryHappy > sad && veryHappy > verySad){
+            icon.setImageDrawable(resources.getDrawable(R.drawable.ic_veryhappy))
+        }
+
+        if (neutral > veryHappy && neutral > happy && neutral > sad && neutral > verySad){
+            icon.setImageDrawable(resources.getDrawable(R.drawable.ic_neutral))
+        }
+
+        if (sad > happy && sad > neutral && sad > veryHappy && sad > verySad){
+            icon.setImageDrawable(resources.getDrawable(R.drawable.ic_sad))
+        }
+
+        if (verySad > happy && verySad > neutral && verySad > sad && veryHappy > verySad){
+            icon.setImageDrawable(resources.getDrawable(R.drawable.ic_verysad))
+        }
     }
 
     fun actualizarGrafica(){
