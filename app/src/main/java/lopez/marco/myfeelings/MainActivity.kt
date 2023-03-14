@@ -1,11 +1,8 @@
 package lopez.marco.myfeelings
 
-import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
 import lopez.myfeelings.graph.utilities.CustomBarDrawable
 import lopez.myfeelings.graph.utilities.CustomCircleDrawable
 import lopez.myfeelings.graph.utilities.JSONFile
@@ -14,6 +11,8 @@ import org.json.JSONArray
 import org.json.JSONException
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
+
+import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
     var jsonFile: JSONFile?=null
@@ -25,9 +24,77 @@ class MainActivity : AppCompatActivity() {
     var data:Boolean=false
     var lista=ArrayList<emociones>()
 
+//    var context: Context? = null
+//    var inflater = LayoutInflater.from(context)
+//    var view = inflater.inflate(R.layout.activity_main, null)
+//    var graph: View = view.findViewById(R.id.graph)
+//    var graphVeryHappy: View = view.findViewById(R.id.graphVeryHappy)
+//    var graphHappy: View = view.findViewById(R.id.graphVeryHappy)
+//    var graphNeutral: View = view.findViewById(R.id.graphVeryHappy)
+//    var graphSad: View = view.findViewById(R.id.graphVeryHappy)
+//    var graphVerySad: View = view.findViewById(R.id.graphVeryHappy)
+//    var guardarButton: Button = view.findViewById(R.id.guardarButton)
+//    var veryHappyButton: Button = view.findViewById(R.id.veryHappyButton)
+//    var happyButton: Button = view.findViewById(R.id.happyButton)
+//    var neutralButton: Button = view.findViewById(R.id.neutralButton)
+//    var sadButton: Button = view.findViewById(R.id.sadButton)
+//    var verySadButton: Button = view.findViewById(R.id.verySadButton)
+//    var icon: ImageView = view.findViewById(R.id.icon)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        jsonFile=JSONFile()
+
+        fetchingData()
+        if(!data){
+            var emociones=ArrayList<emociones>()
+            val fondo=CustomCircleDrawable(this,emociones)
+
+            graph.background=fondo
+            graphVeryHappy.background = CustomBarDrawable(this, emociones("Muy feliz", 0.0F, R.color.mustard, veryHappy))
+            graphHappy.background = CustomBarDrawable(this, emociones("Feliz", 0.0F, R.color.orange , happy))
+            graphNeutral.background = CustomBarDrawable(this, emociones("Neutral", 0.0F, R.color.greenie, neutral))
+            graphSad.background = CustomBarDrawable(this, emociones("Triste", 0.0F, R.color.blue, sad))
+            graphVerySad.background = CustomBarDrawable(this, emociones("Muy triste", 0.0F, R.color.deepBlue, verySad))
+        } else {
+            actualizarGrafica()
+            iconoMayoria()
+        }
+        guardarButton.setOnClickListener{
+            guardar()
+        }
+
+        veryHappyButton.setOnClickListener(){
+            veryHappy++
+            iconoMayoria()
+            actualizarGrafica()
+        }
+
+        happyButton.setOnClickListener(){
+            happy++
+            iconoMayoria()
+            actualizarGrafica()
+        }
+
+        neutralButton.setOnClickListener(){
+            neutral++
+            iconoMayoria()
+            actualizarGrafica()
+        }
+
+        sadButton.setOnClickListener(){
+            sad++
+            iconoMayoria()
+            actualizarGrafica()
+        }
+
+        verySadButton.setOnClickListener(){
+            verySad++
+            iconoMayoria()
+            actualizarGrafica()
+        }
     }
 
     fun fetchingData(){
@@ -79,7 +146,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun actualizarGrafica(){
-        var context: Context? = null
         val total = veryHappy+happy+neutral+verySad+sad
 
         var pVH:Float=(veryHappy*100/total).toFloat()
@@ -103,21 +169,13 @@ class MainActivity : AppCompatActivity() {
 
         val fondo= CustomCircleDrawable(this, lista)
 
-        var inflater = LayoutInflater.from(context)
-        var view = inflater.inflate(R.layout.activity_main, null)
-        var graphVeryHappy: View = view.findViewById(R.id.graphVeryHappy)
-        var graphHappy: View = view.findViewById(R.id.graphVeryHappy)
-        var graphNeutral: View = view.findViewById(R.id.graphVeryHappy)
-        var graphSad: View = view.findViewById(R.id.graphVeryHappy)
-        var graphVerySad: View = view.findViewById(R.id.graphVeryHappy)
-
         graphVeryHappy.background= CustomBarDrawable(this, emociones("Muy feliz", pVH,R.color.mustard, veryHappy))
         graphHappy.background= CustomBarDrawable(this, emociones("Feliz", pH,R.color.orange, happy))
         graphNeutral.background= CustomBarDrawable(this, emociones("Neutral", pN,R.color.greenie, neutral))
         graphSad.background= CustomBarDrawable(this, emociones("Triste", pS,R.color.blue, sad))
         graphVerySad.background= CustomBarDrawable(this, emociones("Muy triste", pVS,R.color.deepBlue, verySad))
 
-        view.background=fondo
+        graph.background=fondo
     }
 
     fun parseJson(jsonArray: JSONArray): ArrayList<emociones>{
@@ -140,5 +198,23 @@ class MainActivity : AppCompatActivity() {
 
     fun guardar(){
 
+        var jsonArray = JSONArray()
+        var o : Int = 0
+
+        for (i in lista){
+            Log.d("objetos", i.toString())
+            var j : JSONObject = JSONObject()
+            j.put("nombre", i.nombre)
+            j.put("porcentaje", i.porcentaje)
+            j.put("color", i.color)
+            j.put("total", i.total)
+
+            jsonArray.put(o, j)
+            o++
+        }
+
+        jsonFile?.saveData(this, jsonArray.toString())
+
+        Toast.makeText(this, "Datos guardados", Toast.LENGTH_SHORT).show()
     }
 }
